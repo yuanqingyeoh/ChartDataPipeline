@@ -11,23 +11,26 @@ public class BatchCsvJob {
 
     public static void main(String[] args) throws Exception {
 
-        final String source_csv_ddl = "CREATE TEMPORARY TABLE ohclv_input (\n" +
+        final String source_csv_ddl = "CREATE TEMPORARY TABLE candle_input (\n" +
                 "                `date` STRING,\n" +
                 "                `time` STRING,\n" +
                 "                `open` DECIMAL(7, 2),\n" +
                 "                `high` DECIMAL(7, 2),\n" +
                 "                `close` DECIMAL(7, 2),\n" +
                 "                `low` DECIMAL(7, 2),\n" +
-                "                `volume` INTEGER\n" +
+                "                `volume` INTEGER,\n" +
+                "                `timestamp` AS TO_TIMESTAMP(CONCAT_WS(' ', `date`, `time`), 'yyyy.MM.dd HH:mm'),\n" +
+                "                WATERMARK FOR `timestamp` AS `timestamp`\n" +
                 "        ) WITH (\n" +
                 "                'connector' = 'filesystem',\n" +
-                "                'path' = 'file:///C:/Self_Exploration/ChartData/XAUUSD/XAUUSD_2022_all.csv',\n" +
+                "                'path' = 'file:///C:/Self_Exploration/ChartData/data/XAUUSD_2022_all.csv',\n" +
                 "                'format' = 'csv',\n" +
                 "                'csv.ignore-parse-errors' = 'true',\n" +
-                "                'csv.allow-comments' = 'true'" +
+                "                'csv.allow-comments' = 'true'\n" +
                 "        )";
 
-        final String out_csv_ddl = "CREATE TABLE ohclv_output (\n" +
+        final String out_csv_ddl = "CREATE TABLE candle_output (\n" +
+                "                `symbol` STRING,\n" +
                 "                `open` DECIMAL(7, 2),\n" +
                 "                `high` DECIMAL(7, 2),\n" +
                 "                `close` DECIMAL(7, 2),\n" +
@@ -45,8 +48,8 @@ public class BatchCsvJob {
 
         EnvironmentSettings settings = EnvironmentSettings
                 .newInstance()
-                //.inStreamingMode()
-                .inBatchMode()
+                .inStreamingMode()
+//                .inBatchMode()
                 .build();
 
         TableEnvironment tEnv = TableEnvironment.create(settings);
@@ -55,26 +58,37 @@ public class BatchCsvJob {
         tEnv.executeSql(source_csv_ddl);
         tEnv.executeSql(out_csv_ddl);
 
-        // Another way to execute query
-//        TableResult tableResult = tEnv.executeSql("SELECT  * FROM ohclv_input LIMIT 10");
-//        tableResult.print();
+        Table raw_table = tEnv.from("candle_input");
+        raw_table.printSchema();
 
-        Table raw_table = tEnv.from("ohclv_input");
+        Table processed_table = raw_table;
 
-        // Create a string timestamp column
-        Table processed_table = raw_table.addColumns(concatWs(" ", $("date"), $("time")).as("timestamp"));
         // Drop date and time column
         processed_table = processed_table.dropColumns($("date"), $("time"));
-        // Convert timestamp string to timestamp type
-        processed_table = processed_table.addOrReplaceColumns(toTimestamp($("timestamp"), "yyyy.MM.dd HH:mm").as("timestamp"));
 
-        TablePipeline tablePipeline = processed_table.insertInto("ohclv_output");
+        processed_table = processed_table.addColumns(lit("XAUUSD").as("symbol"));
+
+        processed_table.printSchema();
+
+        Table result = processed_table
+                .window(Tumble.over(lit(5).minutes()).on($("timestamp")).as("w")) // define window
+                .groupBy($("symbol"), $("w")) // group by key and window
+                // access window properties and aggregate
+                .select(
+                        $("symbol"),
+                        $("open").firstValue().as("open"),
+                        $("high").max().as("high"),
+                        $("close").lastValue().as("close"),
+                        $("low").min().as("low"),
+                        $("volume").sum().as("volume"),
+                        $("w").start().as("timestamp")
+                );
+
+
+        TablePipeline tablePipeline = result.insertInto("candle_output");
         tablePipeline.printExplain();
 
-        TableResult tableResult = tablePipeline.execute();
-        tableResult.print();
+        tablePipeline.execute().print();
     }
-
-
 
 }
