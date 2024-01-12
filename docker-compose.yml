@@ -35,31 +35,31 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-# # Flink Image
-#  jobmanager:
-#    image: flink:1.18
-#    ports:
-#     - "8081:8081"
-#    command: jobmanager
-#    environment:
-#     - |
-#       FLINK_PROPERTIES=
-#       jobmanager.rpc.address: jobmanager
-#    volumes:
-#     - "C:/Self_Exploration/ChartDataPipeline/data:/opt/flink/data"
-#
-#  taskmanager:
-#   image: flink:1.18
-#   depends_on:
-#     - jobmanager
-#   command: taskmanager
-#   environment:
-#     - |
-#       FLINK_PROPERTIES=
-#       jobmanager.rpc.address: jobmanager
-#       taskmanager.numberOfTaskSlots: 2
-#   volumes:
-#     - "C:/Self_Exploration/ChartDataPipeline/data:/opt/flink/data"
+ # Flink Image
+  jobmanager:
+    image: flink:1.18
+    ports:
+     - "8081:8081"
+    command: jobmanager
+    environment:
+     - |
+       FLINK_PROPERTIES=
+       jobmanager.rpc.address: jobmanager
+    volumes:
+     - "./data:/opt/flink/data"
+
+  taskmanager:
+   image: flink:1.18
+   depends_on:
+     - jobmanager
+   command: taskmanager
+   environment:
+     - |
+       FLINK_PROPERTIES=
+       jobmanager.rpc.address: jobmanager
+       taskmanager.numberOfTaskSlots: 2
+   volumes:
+     - "./data:/opt/flink/data"
 
   # Python Script Image
   script:

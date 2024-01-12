@@ -59,11 +59,9 @@ import java.util.*;
 public class DataStreamJob {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataStreamJob.class);
-//	private static final String BROKERS = "kafka:9092";
-private static final String BROKERS = "localhost:29092";
-//	private static final String CASSANDRA_HOSTNAME = "cassandra";
-private static final String CASSANDRA_HOSTNAME = "localhost";
+	private static final String BROKERS = "kafka:9092";
 
+	private static final String CASSANDRA_HOSTNAME = "cassandra";
 
 	public static void main(String[] args) throws Exception {
 
