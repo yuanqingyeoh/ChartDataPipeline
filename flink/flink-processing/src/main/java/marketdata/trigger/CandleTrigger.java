@@ -1,24 +1,28 @@
 package marketdata.trigger;
 
-import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-public class MyTrigger extends Trigger<Object, TimeWindow> {
+import java.time.Duration;
 
-    private MyTrigger() {}
+public class CandleTrigger extends Trigger<Object, TimeWindow> {
+
+    private final Duration candleOffest;
+
+    private CandleTrigger(Duration candleOffest) {
+        this.candleOffest = candleOffest;
+    }
 
     @Override
     public TriggerResult onElement(
             Object element, long timestamp, TimeWindow window, TriggerContext ctx)
             throws Exception {
-        if (window.maxTimestamp() <= ctx.getCurrentWatermark()) {
+        if (window.maxTimestamp() - candleOffest.toNanos() <= ctx.getCurrentWatermark()) {
             // if the watermark is already past the window fire immediately
             return TriggerResult.FIRE;
         } else {
-            //ctx.registerEventTimeTimer(window.maxTimestamp());
-            ctx.registerProcessingTimeTimer(window.maxTimestamp());
+            ctx.registerEventTimeTimer(window.maxTimestamp());
             return TriggerResult.CONTINUE;
         }
     }
@@ -31,7 +35,7 @@ public class MyTrigger extends Trigger<Object, TimeWindow> {
     @Override
     public TriggerResult onProcessingTime(long time, TimeWindow window, TriggerContext ctx)
             throws Exception {
-        return TriggerResult.FIRE;
+        return TriggerResult.CONTINUE;
     }
 
     @Override
@@ -57,7 +61,7 @@ public class MyTrigger extends Trigger<Object, TimeWindow> {
 
     @Override
     public String toString() {
-        return "MyTrigger()";
+        return "CandleTrigger()";
     }
 
     /**
@@ -66,7 +70,7 @@ public class MyTrigger extends Trigger<Object, TimeWindow> {
      * <p>Once the trigger fires all elements are discarded. Elements that arrive late immediately
      * trigger window evaluation with just this one element.
      */
-    public static MyTrigger create() {
-        return new MyTrigger();
+    public static CandleTrigger create(Duration candleOffest) {
+        return new CandleTrigger(candleOffest);
     }
 }

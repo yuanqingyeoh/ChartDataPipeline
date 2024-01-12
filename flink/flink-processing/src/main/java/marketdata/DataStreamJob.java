@@ -18,7 +18,9 @@
 
 package marketdata;
 
+import marketdata.function.AggCandleFunction;
 import marketdata.model.*;
+import marketdata.trigger.CandleTrigger;
 import marketdata.trigger.MyTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,9 @@ import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 /**
  * Skeleton for a Flink DataStream Job.
@@ -55,7 +59,11 @@ import java.util.Date;
 public class DataStreamJob {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataStreamJob.class);
-	private static final String BROKERS = "localhost:9092";
+//	private static final String BROKERS = "kafka:9092";
+private static final String BROKERS = "localhost:29092";
+//	private static final String CASSANDRA_HOSTNAME = "cassandra";
+private static final String CASSANDRA_HOSTNAME = "localhost";
+
 
 	public static void main(String[] args) throws Exception {
 
@@ -76,7 +84,7 @@ public class DataStreamJob {
 
 		DataStream<StreamInput> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
-		DataStream<TickData> dataStream = input.flatMap(new FlatMapFunction<StreamInput, TickData>() {
+		DataStream<TickData> data_tick = input.flatMap(new FlatMapFunction<StreamInput, TickData>() {
 			@Override
 			public void flatMap(StreamInput streamInput, Collector<TickData> collector) throws Exception {
 				streamInput.getResult().getData().forEach(dataItem -> {
@@ -85,16 +93,16 @@ public class DataStreamJob {
 			}
 		});
 
-		dataStream.print("Received ");
-//		CassandraSink.addSink(dataStream)
-//				.setHost("127.0.0.1", 9042)
-//				.setDefaultKeyspace("market_data")
-//				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
-//				.build();
+		data_tick.print("Received ");
+		CassandraSink.addSink(data_tick)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
 
 		// Custom trigger that trigger when processing time reach window max timestamp.
-		//Processing M1
-		DataStream<Candle_M1> data_m1 = dataStream
+		// Processing M1
+		DataStream<Candle> candleStream = data_tick
 				.assignTimestampsAndWatermarks(
 						WatermarkStrategy
 								.<TickData>forBoundedOutOfOrderness(Duration.ofSeconds(1))
@@ -103,38 +111,38 @@ public class DataStreamJob {
 				.windowAll(TumblingEventTimeWindows.of(Time.minutes(1)))
 				.allowedLateness(Time.seconds(1))
 				.trigger(MyTrigger.create())
-				.process(new TradeToCandleFunction())
-				.map(Candle_M1::new);
+				.process(new TradeToCandleFunction());
+
+		DataStream<Candle_M1> data_m1 = candleStream.map(Candle_M1::new);
 
 		data_m1.print("Processed M1 ");
 		CassandraSink.addSink(data_m1)
-				.setHost("127.0.0.1", 9042)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
 				.setDefaultKeyspace("market_data")
 				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
 				.build();
 
 
 		// Processing M5
-		DataStream<Candle_M5> data_m5 = dataStream
+		candleStream = candleStream
 				.assignTimestampsAndWatermarks(
 						WatermarkStrategy
-								.<TickData>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
 								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
 								.withIdleness(Duration.ofSeconds(10)))
 				.windowAll(TumblingEventTimeWindows.of(Time.minutes(5)))
-				.allowedLateness(Time.seconds(1))
-				.trigger(MyTrigger.create())
-				.process(new TradeToCandleFunction())
-				.map(Candle_M5::new);
+				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
+				.process(new AggCandleFunction());
 
+		DataStream<Candle_M5> data_m5 = candleStream.map(Candle_M5::new);
 		data_m5.print("Processed M5 ");
 		CassandraSink.addSink(data_m5)
-				.setHost("127.0.0.1", 9042)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
 				.setDefaultKeyspace("market_data")
 				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
 				.build();
 
 		// Execute program, beginning computation.
-		env.execute("Flink Java API Skeleton");
+		env.execute("XRP/USDT Stream Job");
 	}
 }

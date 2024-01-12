@@ -8,7 +8,11 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class TradeToCandleFunction extends ProcessAllWindowFunction<TickData, Candle, TimeWindow> {
 
@@ -17,8 +21,14 @@ public class TradeToCandleFunction extends ProcessAllWindowFunction<TickData, Ca
     @Override
     public void process(ProcessAllWindowFunction<TickData, Candle, TimeWindow>.Context context, Iterable<TickData> iterable, Collector<Candle> collector) throws Exception {
 
+        LocalDateTime windowStart =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(context.window().getStart()),
+                        TimeZone.getDefault().toZoneId());
 
-        LOG.info("Starting process function...");
+        LocalDateTime windowEnd =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(context.window().getEnd()),
+                        TimeZone.getDefault().toZoneId());
+
         if (iterable.iterator().hasNext()) {
 
             Date earliest = new Date();
@@ -27,9 +37,10 @@ public class TradeToCandleFunction extends ProcessAllWindowFunction<TickData, Ca
             Candle processingCandle = new Candle();
             processingCandle.setTimestamp(new Date(context.window().getStart()));
             processingCandle.setVolume(0);
+            processingCandle.setProcessingTime(Instant.now());
 
             for (TickData tickData: iterable) {
-                LOG.info("Processing: " + tickData);
+                LOG.debug("Processing for window " + windowStart + " to " + windowEnd + " : " + tickData);
 
                 // Set SYMBOL
                 processingCandle.setSymbol(tickData.getSymbol());

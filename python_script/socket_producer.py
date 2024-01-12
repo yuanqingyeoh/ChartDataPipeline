@@ -6,7 +6,7 @@ import json
 
 TOPIC = 'xrp-usdt-stream'
 
-conf = {'bootstrap.servers': 'localhost:9092',
+conf = {'bootstrap.servers': 'kafka:9092',
         'client.id': "CRYPTO_XRP_USDT_SOCKET_PRODUCER"}
 
 

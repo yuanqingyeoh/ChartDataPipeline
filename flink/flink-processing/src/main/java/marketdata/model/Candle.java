@@ -1,8 +1,10 @@
 package marketdata.model;
 
 import com.datastax.driver.mapping.annotations.Column;
+import com.datastax.driver.mapping.annotations.Transient;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 
 public class Candle {
@@ -21,6 +23,8 @@ public class Candle {
     BigDecimal close;
     @Column(name="VOLUME")
     Integer volume;
+    @Transient
+    Instant processingTime;
 
     public Candle() {
     }
@@ -91,15 +95,25 @@ public class Candle {
         this.volume = volume;
     }
 
+    public Instant getProcessingTime() {
+        return processingTime;
+    }
+
+    public void setProcessingTime(Instant processingTime) {
+        this.processingTime = processingTime;
+    }
+
     @Override
     public String toString() {
         return "Candle{" +
-                "timestamp=" + timestamp +
+                "symbol='" + symbol + '\'' +
+                ", timestamp=" + timestamp +
                 ", open=" + open +
                 ", high=" + high +
                 ", low=" + low +
                 ", close=" + close +
                 ", volume=" + volume +
+                ", processingTime=" + processingTime +
                 '}';
     }
 }
