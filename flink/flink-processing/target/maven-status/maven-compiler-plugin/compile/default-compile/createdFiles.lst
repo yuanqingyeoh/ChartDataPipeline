@@ -1,6 +1,7 @@
 marketdata\model\TickData.class
 marketdata\jobs\BatchAPIJob.class
 marketdata\function\CandleFunction.class
+marketdata\trigger\CandleTrigger.class
 marketdata\function\TradeToCandleFunction.class
 marketdata\model\DataItem.class
 marketdata\trigger\MyTrigger.class
@@ -12,6 +13,7 @@ marketdata\model\StreamInput.class
 marketdata\model\Result.class
 marketdata\jobs\BatchCSVDataStream$1.class
 marketdata\model\OHCLVInput.class
+marketdata\function\AggCandleFunction.class
 marketdata\model\Candle_M1.class
 marketdata\jobs\BatchCSVDataStream.class
 marketdata\model\Candle_M5.class

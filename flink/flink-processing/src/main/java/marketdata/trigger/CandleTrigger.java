@@ -3,11 +3,17 @@ package marketdata.trigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 public class CandleTrigger extends Trigger<Object, TimeWindow> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CandleTrigger.class);
     private final Duration candleOffest;
 
     private CandleTrigger(Duration candleOffest) {
@@ -18,7 +24,22 @@ public class CandleTrigger extends Trigger<Object, TimeWindow> {
     public TriggerResult onElement(
             Object element, long timestamp, TimeWindow window, TriggerContext ctx)
             throws Exception {
-        if (window.maxTimestamp() - candleOffest.toNanos() <= ctx.getCurrentWatermark()) {
+
+        LocalDateTime windowStart =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(window.getStart()),
+                        TimeZone.getDefault().toZoneId());
+
+        LocalDateTime windowEnd =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(window.getEnd()),
+                        TimeZone.getDefault().toZoneId());
+        LocalDateTime currentWatermark = LocalDateTime.ofInstant(Instant.ofEpochMilli(ctx.getCurrentWatermark()),
+                TimeZone.getDefault().toZoneId());
+        LocalDateTime triggerTimestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(window.maxTimestamp() - candleOffest.toMillis()),
+                TimeZone.getDefault().toZoneId());
+        LocalDateTime eventTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+                TimeZone.getDefault().toZoneId());
+        LOG.info("Processing: "+ windowStart + " to " + windowEnd +" Current watermark: " + currentWatermark + " Trigger Timestamp: " + triggerTimestamp + " " +eventTime);
+        if (window.maxTimestamp() - candleOffest.toMillis() <= ctx.getCurrentWatermark()) {
             // if the watermark is already past the window fire immediately
             return TriggerResult.FIRE;
         } else {

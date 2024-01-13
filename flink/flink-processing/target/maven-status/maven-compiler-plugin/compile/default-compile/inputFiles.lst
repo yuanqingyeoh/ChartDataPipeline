@@ -5,10 +5,12 @@ C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marke
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\function\TradeToCandleFunction.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\model\StreamInput.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\DataStreamJob.java
+C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\function\AggCandleFunction.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\model\TickData.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\trigger\MyTrigger.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\jobs\BatchAPIJob.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\model\Candle.java
+C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\trigger\CandleTrigger.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\jobs\BatchCSVDataStream.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\model\Result.java
 C:\Self_Exploration\ChartDataPipeline\flink\flink-processing\src\main\java\marketdata\function\CandleFunction.java

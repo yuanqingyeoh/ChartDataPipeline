@@ -1,11 +1,18 @@
 package marketdata.trigger;
 
-import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 public class MyTrigger extends Trigger<Object, TimeWindow> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MyTrigger.class);
 
     private MyTrigger() {}
 
@@ -13,6 +20,20 @@ public class MyTrigger extends Trigger<Object, TimeWindow> {
     public TriggerResult onElement(
             Object element, long timestamp, TimeWindow window, TriggerContext ctx)
             throws Exception {
+        LocalDateTime windowStart =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(window.getStart()),
+                        TimeZone.getDefault().toZoneId());
+
+        LocalDateTime windowEnd =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(window.getEnd()),
+                        TimeZone.getDefault().toZoneId());
+        LocalDateTime currentWatermark = LocalDateTime.ofInstant(Instant.ofEpochMilli(ctx.getCurrentWatermark()),
+                TimeZone.getDefault().toZoneId());
+        LocalDateTime triggerTimestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(window.maxTimestamp()),
+                TimeZone.getDefault().toZoneId());
+        LocalDateTime eventTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+                TimeZone.getDefault().toZoneId());
+        LOG.info("Trigger processing: "+ windowStart + " to " + windowEnd  + " Trigger Timestamp: " + triggerTimestamp +" Current watermark: " + currentWatermark + " Event Time: " + eventTime);
         if (window.maxTimestamp() <= ctx.getCurrentWatermark()) {
             // if the watermark is already past the window fire immediately
             return TriggerResult.FIRE;

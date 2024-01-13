@@ -22,6 +22,8 @@ import marketdata.function.AggCandleFunction;
 import marketdata.model.*;
 import marketdata.trigger.CandleTrigger;
 import marketdata.trigger.MyTrigger;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.triggers.ProcessingTimeTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.mapping.Mapper;
@@ -60,6 +62,7 @@ public class DataStreamJob {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DataStreamJob.class);
 	private static final String BROKERS = "kafka:9092";
+// 	private static final String BROKERS = "localhost:29092";
 
 	private static final String CASSANDRA_HOSTNAME = "cassandra";
 
@@ -129,7 +132,8 @@ public class DataStreamJob {
 								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
 								.withIdleness(Duration.ofSeconds(10)))
 				.windowAll(TumblingEventTimeWindows.of(Time.minutes(5)))
-				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
+				.trigger(ProcessingTimeTrigger.create())
+//				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
 				.process(new AggCandleFunction());
 
 		DataStream<Candle_M5> data_m5 = candleStream.map(Candle_M5::new);
@@ -140,6 +144,7 @@ public class DataStreamJob {
 				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
 				.build();
 
+		System.out.println(env.getExecutionPlan());
 		// Execute program, beginning computation.
 		env.execute("XRP/USDT Stream Job");
 	}
