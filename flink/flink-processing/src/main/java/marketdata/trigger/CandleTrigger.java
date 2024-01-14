@@ -32,25 +32,22 @@ public class CandleTrigger extends Trigger<Object, TimeWindow> {
         LocalDateTime windowEnd =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(window.getEnd()),
                         TimeZone.getDefault().toZoneId());
-        LocalDateTime currentWatermark = LocalDateTime.ofInstant(Instant.ofEpochMilli(ctx.getCurrentWatermark()),
-                TimeZone.getDefault().toZoneId());
         LocalDateTime triggerTimestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(window.maxTimestamp() - candleOffest.toMillis()),
                 TimeZone.getDefault().toZoneId());
         LocalDateTime eventTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
                 TimeZone.getDefault().toZoneId());
-        LOG.info("Processing: "+ windowStart + " to " + windowEnd +" Current watermark: " + currentWatermark + " Trigger Timestamp: " + triggerTimestamp + " " +eventTime);
-        if (window.maxTimestamp() - candleOffest.toMillis() <= ctx.getCurrentWatermark()) {
+        LOG.debug("Processing: "+ windowStart + " to " + windowEnd +" Current timestamp: " + eventTime + " Trigger Timestamp: " + triggerTimestamp);
+        if (window.maxTimestamp() - candleOffest.toMillis() <= timestamp) {
             // if the watermark is already past the window fire immediately
             return TriggerResult.FIRE;
         } else {
-            ctx.registerEventTimeTimer(window.maxTimestamp());
             return TriggerResult.CONTINUE;
         }
     }
 
     @Override
     public TriggerResult onEventTime(long time, TimeWindow window, TriggerContext ctx) {
-        return time == window.maxTimestamp() ? TriggerResult.FIRE : TriggerResult.CONTINUE;
+        return TriggerResult.CONTINUE;
     }
 
     @Override

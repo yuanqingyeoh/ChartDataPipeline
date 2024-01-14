@@ -101,7 +101,6 @@ public class DataStreamJob {
 				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
 				.build();
 
-		// Custom trigger that trigger when processing time reach window max timestamp.
 		// Processing M1
 		DataStream<Candle> candleStream = data_tick
 				.assignTimestampsAndWatermarks(
@@ -132,8 +131,7 @@ public class DataStreamJob {
 								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
 								.withIdleness(Duration.ofSeconds(10)))
 				.windowAll(TumblingEventTimeWindows.of(Time.minutes(5)))
-				.trigger(ProcessingTimeTrigger.create())
-//				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
+				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
 				.process(new AggCandleFunction());
 
 		DataStream<Candle_M5> data_m5 = candleStream.map(Candle_M5::new);
