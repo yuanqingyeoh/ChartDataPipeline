@@ -20,10 +20,11 @@ package marketdata;
 
 import marketdata.function.AggCandleFunction;
 import marketdata.model.*;
+import marketdata.model.candle.Candle;
+import marketdata.model.candle.Candle_M1;
+import marketdata.model.candle.Candle_M5;
 import marketdata.trigger.CandleTrigger;
 import marketdata.trigger.MyTrigger;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.triggers.ProcessingTimeTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.datastax.driver.mapping.Mapper;
@@ -42,8 +43,6 @@ import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 /**
@@ -108,7 +107,8 @@ public class DataStreamJob {
 								.<TickData>forBoundedOutOfOrderness(Duration.ofSeconds(1))
 								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
 								.withIdleness(Duration.ofSeconds(10)))
-				.windowAll(TumblingEventTimeWindows.of(Time.minutes(1)))
+				.keyBy(TickData::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.minutes(1)))
 				.allowedLateness(Time.seconds(1))
 				.trigger(MyTrigger.create())
 				.process(new TradeToCandleFunction());
@@ -130,7 +130,8 @@ public class DataStreamJob {
 								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
 								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
 								.withIdleness(Duration.ofSeconds(10)))
-				.windowAll(TumblingEventTimeWindows.of(Time.minutes(5)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.minutes(5)))
 				.trigger(CandleTrigger.create(Duration.ofMinutes(1)))
 				.process(new AggCandleFunction());
 

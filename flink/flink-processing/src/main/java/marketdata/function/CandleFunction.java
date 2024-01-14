@@ -1,7 +1,7 @@
 package marketdata.function;
 
-import marketdata.model.Candle;
-import marketdata.model.Candle_M1;
+import marketdata.model.candle.Candle;
+import marketdata.model.candle.Candle_M1;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;

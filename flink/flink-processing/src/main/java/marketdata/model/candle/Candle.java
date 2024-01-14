@@ -1,4 +1,4 @@
-package marketdata.model;
+package marketdata.model.candle;
 
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.Transient;

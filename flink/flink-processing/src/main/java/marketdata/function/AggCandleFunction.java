@@ -1,9 +1,7 @@
 package marketdata.function;
 
-import marketdata.model.Candle;
-import marketdata.model.Candle_M1;
-import marketdata.model.TickData;
-import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
+import marketdata.model.candle.Candle;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
@@ -16,12 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class AggCandleFunction extends ProcessAllWindowFunction<Candle,Candle, TimeWindow> {
+public class AggCandleFunction extends ProcessWindowFunction<Candle, Candle, String, TimeWindow> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AggCandleFunction.class);
 
     @Override
-    public void process(ProcessAllWindowFunction<Candle, Candle, TimeWindow>.Context context, Iterable<Candle> iterable, Collector<Candle> collector) throws Exception {
+    public void process(String s, ProcessWindowFunction<Candle, Candle, String, TimeWindow>.Context context, Iterable<Candle> iterable, Collector<Candle> collector) throws Exception {
 
         LocalDateTime windowStart =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(context.window().getStart()),
@@ -39,6 +37,8 @@ public class AggCandleFunction extends ProcessAllWindowFunction<Candle,Candle, T
             Candle processingCandle = new Candle();
             processingCandle.setTimestamp(new Date(context.window().getStart()));
             processingCandle.setVolume(0);
+            // Set SYMBOL
+            processingCandle.setSymbol(s);
 
             Map<Date, Candle> candleStore = new HashMap<>();
             for (Candle data: iterable) {
@@ -50,9 +50,6 @@ public class AggCandleFunction extends ProcessAllWindowFunction<Candle,Candle, T
 
             for (Candle data : candleStore.values()) {
                 LOG.debug("Processing for window " + windowStart + " to " + windowEnd + " : " + data);
-
-                // Set SYMBOL
-                processingCandle.setSymbol(data.getSymbol());
 
                 // Calculate volume
                 processingCandle.setVolume(processingCandle.getVolume() + data.getVolume());

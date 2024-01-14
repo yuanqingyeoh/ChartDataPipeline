@@ -1,22 +1,22 @@
-package marketdata.model;
+package marketdata.model.candle;
 
 import com.datastax.driver.mapping.annotations.Table;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Table(keyspace = "market_data", name = "TB_M1")
-public class Candle_M1 extends Candle {
+@Table(keyspace = "market_data", name = "TB_M30")
+public class Candle_M30 extends Candle {
 
-    public Candle_M1() {
+    public Candle_M30() {
         super();
     }
 
-    public Candle_M1(Candle candle) {
+    public Candle_M30(Candle candle) {
         super(candle.getSymbol(), candle.getTimestamp(), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
     }
 
-    public Candle_M1(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, Integer volume) {
+    public Candle_M30(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, Integer volume) {
         super(symbol, timestamp, open, high, low, close, volume);
     }
 }

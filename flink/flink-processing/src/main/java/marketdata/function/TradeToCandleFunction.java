@@ -1,25 +1,24 @@
 package marketdata.function;
 
-import marketdata.model.Candle;
+import marketdata.model.candle.Candle;
 import marketdata.model.TickData;
-import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class TradeToCandleFunction extends ProcessAllWindowFunction<TickData, Candle, TimeWindow> {
+public class TradeToCandleFunction extends ProcessWindowFunction<TickData, Candle, String, TimeWindow> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TradeToCandleFunction.class);
 
     @Override
-    public void process(ProcessAllWindowFunction<TickData, Candle, TimeWindow>.Context context, Iterable<TickData> iterable, Collector<Candle> collector) throws Exception {
+    public void process(String s, ProcessWindowFunction<TickData, Candle, String, TimeWindow>.Context context, Iterable<TickData> iterable, Collector<Candle> collector) throws Exception {
 
         LocalDateTime windowStart =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(context.window().getStart()),
@@ -38,12 +37,13 @@ public class TradeToCandleFunction extends ProcessAllWindowFunction<TickData, Ca
             processingCandle.setTimestamp(new Date(context.window().getStart()));
             processingCandle.setVolume(0);
             processingCandle.setProcessingTime(Instant.now());
+            // Set SYMBOL
+            processingCandle.setSymbol(s);
 
             for (TickData tickData: iterable) {
                 LOG.debug("Processing for window " + windowStart + " to " + windowEnd + " : " + tickData);
 
-                // Set SYMBOL
-                processingCandle.setSymbol(tickData.getSymbol());
+
 
                 // Calculate volume
                 processingCandle.setVolume(processingCandle.getVolume() + tickData.getQuantity());

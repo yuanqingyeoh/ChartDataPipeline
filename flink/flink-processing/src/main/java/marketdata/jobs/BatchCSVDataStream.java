@@ -2,8 +2,8 @@ package marketdata.jobs;
 
 import marketdata.function.CandleFunction;
 import marketdata.model.OHCLVInput;
-import marketdata.model.Candle_M1;
-import marketdata.model.Candle_M5;
+import marketdata.model.candle.Candle_M1;
+import marketdata.model.candle.Candle_M5;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
