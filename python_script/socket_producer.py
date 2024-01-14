@@ -4,10 +4,10 @@ from websockets.sync.client import connect
 import websockets
 import json
 
-TOPIC = 'xrp-usdt-stream'
+TOPIC = 'crypto-websocket-stream'
 
 conf = {'bootstrap.servers': 'kafka:9092',
-        'client.id': "CRYPTO_XRP_USDT_SOCKET_PRODUCER"}
+        'client.id': "CRYPTO_SOCKET_PRODUCER"}
 
 
 def acked(err, msg):
@@ -24,7 +24,7 @@ with connect("wss://stream.crypto.com/exchange/v1/market") as websocket:
       "id": 1,
       "method": "subscribe",
       "params": {
-          "channels": ["trade.XRP_USDT"]
+          "channels": ["trade.XRP_USDT", "trade.BTC_USDT"]
       }
     }
     websocket.send(json.dumps(data))

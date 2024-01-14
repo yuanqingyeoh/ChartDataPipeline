@@ -22,14 +22,14 @@ public class Candle {
     @Column(name="CLOSE")
     BigDecimal close;
     @Column(name="VOLUME")
-    Integer volume;
+    BigDecimal volume;
     @Transient
     Instant processingTime;
 
     public Candle() {
     }
 
-    public Candle(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, Integer volume) {
+    public Candle(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, BigDecimal volume) {
         this.symbol = symbol;
         this.timestamp = timestamp;
         this.open = open;
@@ -87,11 +87,11 @@ public class Candle {
         this.close = close;
     }
 
-    public Integer getVolume() {
+    public BigDecimal getVolume() {
         return volume;
     }
 
-    public void setVolume(Integer volume) {
+    public void setVolume(BigDecimal volume) {
         this.volume = volume;
     }
 

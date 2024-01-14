@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_TICK(
         SYMBOL ascii,
         TIMESTAMP timestamp,
         PRICE decimal,
-        QUANTITY int,
+        QUANTITY decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_M1(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_M5(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_M15(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_M30(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_H1(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_H4(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS market_data.TB_D(
         HIGH decimal,
         LOW decimal,
         CLOSE decimal,
-        volume int,
+        volume decimal,
         PRIMARY KEY((SYMBOL), TIMESTAMP)
     )
 WITH CLUSTERING ORDER BY(TIMESTAMP ASC);

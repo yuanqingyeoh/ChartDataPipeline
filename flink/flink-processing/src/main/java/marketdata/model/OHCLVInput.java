@@ -13,7 +13,7 @@ public class OHCLVInput {
     BigDecimal high;
     BigDecimal low;
     BigDecimal close;
-    Integer volume;
+    BigDecimal volume;
 
     public String getDate() {
         return date;
@@ -63,11 +63,11 @@ public class OHCLVInput {
         this.close = close;
     }
 
-    public Integer getVolume() {
+    public BigDecimal getVolume() {
         return volume;
     }
 
-    public void setVolume(Integer volume) {
+    public void setVolume(BigDecimal volume) {
         this.volume = volume;
     }
 }

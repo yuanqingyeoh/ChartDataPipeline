@@ -19,12 +19,12 @@ public class TickData {
     private BigDecimal price;
 
     @Column(name = "QUANTITY")
-    private Integer quantity;
+    private BigDecimal quantity;
 
     public TickData() {
     }
 
-    public TickData(String symbol, Date timestamp, BigDecimal price, Integer quantity) {
+    public TickData(String symbol, Date timestamp, BigDecimal price, BigDecimal quantity) {
         this.symbol = symbol;
         this.timestamp = timestamp;
         this.price = price;
@@ -55,11 +55,11 @@ public class TickData {
         this.price = price;
     }
 
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
 
