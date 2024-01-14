@@ -16,7 +16,7 @@ public class CandleFunction extends ProcessAllWindowFunction<Candle_M1, Candle, 
                 processingCandle = new Candle(candle.getSymbol(), candle.getTimestamp(), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
             } else {
                 // Sum the volume
-                processingCandle.setVolume(processingCandle.getVolume() + candle.getVolume());
+                processingCandle.setVolume(processingCandle.getVolume().add(candle.getVolume()));
 
                 // Set the close
                 processingCandle.setClose(candle.getClose());

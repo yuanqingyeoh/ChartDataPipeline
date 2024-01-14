@@ -7,6 +7,7 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -36,7 +37,7 @@ public class AggCandleFunction extends ProcessWindowFunction<Candle, Candle, Str
 
             Candle processingCandle = new Candle();
             processingCandle.setTimestamp(new Date(context.window().getStart()));
-            processingCandle.setVolume(0);
+            processingCandle.setVolume(new BigDecimal(0));
             // Set SYMBOL
             processingCandle.setSymbol(s);
 
@@ -52,7 +53,7 @@ public class AggCandleFunction extends ProcessWindowFunction<Candle, Candle, Str
                 LOG.debug("Processing for window " + windowStart + " to " + windowEnd + " : " + data);
 
                 // Calculate volume
-                processingCandle.setVolume(processingCandle.getVolume() + data.getVolume());
+                processingCandle.setVolume(processingCandle.getVolume().add(data.getVolume()));
 
                 // Calculate high
                 if (processingCandle.getHigh() == null) {

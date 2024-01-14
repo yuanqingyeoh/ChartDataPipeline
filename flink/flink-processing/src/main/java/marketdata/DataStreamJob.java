@@ -76,19 +76,18 @@ public class DataStreamJob {
 
 		KafkaSource<StreamInput> source = KafkaSource.<StreamInput>builder()
 				.setBootstrapServers(BROKERS)
-				.setTopics("xrp-usdt-stream")
-				.setGroupId("CRYPTO_XRP_USDT_SOCKET_CONSUMER_FLINK")
+				.setTopics("crypto-websocket-stream")
+				.setGroupId("CRYPTO_SOCKET_CONSUMER_FLINK")
 				.setStartingOffsets(OffsetsInitializer.earliest())
 				.setValueOnlyDeserializer(jsonFormat)
 				.build();
 
 		DataStream<StreamInput> input = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-
 		DataStream<TickData> data_tick = input.flatMap(new FlatMapFunction<StreamInput, TickData>() {
 			@Override
 			public void flatMap(StreamInput streamInput, Collector<TickData> collector) throws Exception {
 				streamInput.getResult().getData().forEach(dataItem -> {
-					collector.collect(new TickData(dataItem.getI(), new Date(dataItem.getT()), new BigDecimal(dataItem.getP()), Integer.parseInt(dataItem.getQ())));
+					collector.collect(new TickData(dataItem.getI(), new Date(dataItem.getT()), new BigDecimal(dataItem.getP()), new BigDecimal(dataItem.getQ())));
 				});
 			}
 		});

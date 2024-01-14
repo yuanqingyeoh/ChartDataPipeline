@@ -8,6 +8,7 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -35,7 +36,7 @@ public class TradeToCandleFunction extends ProcessWindowFunction<TickData, Candl
 
             Candle processingCandle = new Candle();
             processingCandle.setTimestamp(new Date(context.window().getStart()));
-            processingCandle.setVolume(0);
+            processingCandle.setVolume(new BigDecimal(0));
             processingCandle.setProcessingTime(Instant.now());
             // Set SYMBOL
             processingCandle.setSymbol(s);
@@ -46,7 +47,7 @@ public class TradeToCandleFunction extends ProcessWindowFunction<TickData, Candl
 
 
                 // Calculate volume
-                processingCandle.setVolume(processingCandle.getVolume() + tickData.getQuantity());
+                processingCandle.setVolume(processingCandle.getVolume().add(tickData.getQuantity()));
 
                 // Calculate high
                 if (processingCandle.getHigh() == null) {

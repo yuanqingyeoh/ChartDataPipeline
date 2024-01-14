@@ -16,7 +16,7 @@ public class Candle_H1 extends Candle {
         super(candle.getSymbol(), candle.getTimestamp(), candle.getOpen(), candle.getHigh(), candle.getLow(), candle.getClose(), candle.getVolume());
     }
 
-    public Candle_H1(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, Integer volume) {
+    public Candle_H1(String symbol, Date timestamp, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, BigDecimal volume) {
         super(symbol, timestamp, open, high, low, close, volume);
     }
 }
