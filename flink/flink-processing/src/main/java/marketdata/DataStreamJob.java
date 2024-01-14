@@ -20,9 +20,7 @@ package marketdata;
 
 import marketdata.function.AggCandleFunction;
 import marketdata.model.*;
-import marketdata.model.candle.Candle;
-import marketdata.model.candle.Candle_M1;
-import marketdata.model.candle.Candle_M5;
+import marketdata.model.candle.*;
 import marketdata.trigger.CandleTrigger;
 import marketdata.trigger.MyTrigger;
 import org.slf4j.Logger;
@@ -142,8 +140,108 @@ public class DataStreamJob {
 				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
 				.build();
 
+		// Processing M15
+		candleStream = candleStream
+				.assignTimestampsAndWatermarks(
+						WatermarkStrategy
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
+								.withIdleness(Duration.ofSeconds(10)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.minutes(15)))
+				.trigger(CandleTrigger.create(Duration.ofMinutes(5)))
+				.process(new AggCandleFunction());
+
+		DataStream<Candle_M15> data_m15 = candleStream.map(Candle_M15::new);
+		data_m15.print("Processed M15 ");
+		CassandraSink.addSink(data_m15)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
+
+		// Processing M30
+		candleStream = candleStream
+				.assignTimestampsAndWatermarks(
+						WatermarkStrategy
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
+								.withIdleness(Duration.ofSeconds(10)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.minutes(30)))
+				.trigger(CandleTrigger.create(Duration.ofMinutes(15)))
+				.process(new AggCandleFunction());
+
+		DataStream<Candle_M30> data_m30 = candleStream.map(Candle_M30::new);
+		data_m30.print("Processed M30 ");
+		CassandraSink.addSink(data_m30)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
+
+		// Processing H1
+		candleStream = candleStream
+				.assignTimestampsAndWatermarks(
+						WatermarkStrategy
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
+								.withIdleness(Duration.ofSeconds(10)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.hours(1)))
+				.trigger(CandleTrigger.create(Duration.ofMinutes(30)))
+				.process(new AggCandleFunction());
+
+		DataStream<Candle_H1> data_h1 = candleStream.map(Candle_H1::new);
+		data_h1.print("Processed M30 ");
+		CassandraSink.addSink(data_h1)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
+
+		// Processing H4
+		candleStream = candleStream
+				.assignTimestampsAndWatermarks(
+						WatermarkStrategy
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
+								.withIdleness(Duration.ofSeconds(10)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.hours(4)))
+				.trigger(CandleTrigger.create(Duration.ofHours(1)))
+				.process(new AggCandleFunction());
+
+		DataStream<Candle_H4> data_h4 = candleStream.map(Candle_H4::new);
+		data_h4.print("Processed H4 ");
+		CassandraSink.addSink(data_h4)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
+
+		// Processing D
+		candleStream = candleStream
+				.assignTimestampsAndWatermarks(
+						WatermarkStrategy
+								.<Candle>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+								.withTimestampAssigner((event, timestamp) -> event.getTimestamp().getTime())
+								.withIdleness(Duration.ofSeconds(10)))
+				.keyBy(Candle::getSymbol)
+				.window(TumblingEventTimeWindows.of(Time.days(1)))
+				.trigger(CandleTrigger.create(Duration.ofHours(4)))
+				.process(new AggCandleFunction());
+
+		DataStream<Candle_D> data_d = candleStream.map(Candle_D::new);
+		data_d.print("Processed D ");
+		CassandraSink.addSink(data_d)
+				.setHost(CASSANDRA_HOSTNAME, 9042)
+				.setDefaultKeyspace("market_data")
+				.setMapperOptions(() -> new Mapper.Option[]{Mapper.Option.saveNullFields(true)})
+				.build();
+
 		System.out.println(env.getExecutionPlan());
 		// Execute program, beginning computation.
-		env.execute("XRP/USDT Stream Job");
+		env.execute("Crypto Trade Data Stream Job");
 	}
 }
